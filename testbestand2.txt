@@ -1,0 +1,7 @@
+om te updaten:
+git add .
+git commit -m "update"
+git push
+
+om te pullen:
+git pull
