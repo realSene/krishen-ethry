@@ -23,6 +23,11 @@ import {
 import './App.css';
 
 const STORAGE_KEYS = {
+  profile: 'lifeos:userProfile',
+  onboardingComplete: 'lifeos:onboardingComplete',
+  sidebarCollapsed: 'lifeos:sidebarCollapsed',
+  dashboardWidgets: 'lifeos:dashboardWidgets',
+  preferences: 'lifeos:preferences',
   sleep: 'lifeos:sleepEntries',
   workouts: 'lifeos:workouts',
   meals: 'lifeos:meals',
@@ -41,8 +46,10 @@ const navigationItems = [
   { label: 'Habits', view: 'habits', icon: CalendarCheck2 },
   { label: 'Finance', view: 'finance', icon: PiggyBank },
   { label: 'Goals', view: 'goals', icon: Target },
-  { label: 'Diary', view: 'diary', icon: NotebookPen },
+  { label: 'Journal', view: 'diary', icon: NotebookPen },
+  { label: 'Agenda', view: 'agenda', icon: CalendarCheck2 },
   { label: 'AI Coach', view: 'coach', icon: Bot },
+  { label: 'Settings', view: 'settings', icon: Activity },
 ];
 
 const modules = [
@@ -101,6 +108,116 @@ const modules = [
     subtitle: 'Get personalized feedback, prompts, and daily guidance.',
     icon: Bot,
     accent: 'blue',
+  },
+];
+
+const onboardingInitialProfile = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  gender: '',
+  dateOfBirth: '',
+};
+
+const defaultDashboardWidgets = [
+  'sleep-overview',
+  'habit-streak',
+  'finance-balance',
+  'agenda-next',
+  'goal-progress',
+  'weekly-graph',
+];
+
+const dashboardWidgetCatalog = [
+  {
+    id: 'sleep-overview',
+    title: 'Sleep tracker',
+    type: 'Widget',
+    icon: Moon,
+    accent: 'cyan',
+    value: '7h 42m',
+    label: 'Average sleep',
+    spark: ['60%', '76%', '68%', '82%', '74%'],
+  },
+  {
+    id: 'habit-streak',
+    title: 'Habit streaks',
+    type: 'Stat',
+    icon: Flame,
+    accent: 'rose',
+    value: '18 days',
+    label: 'Best active streak',
+    spark: ['44%', '50%', '62%', '78%', '88%'],
+  },
+  {
+    id: 'finance-balance',
+    title: 'Finance balance',
+    type: 'Stat',
+    icon: PiggyBank,
+    accent: 'gold',
+    value: '€3,420',
+    label: 'Available this month',
+    spark: ['80%', '74%', '69%', '77%', '84%'],
+  },
+  {
+    id: 'agenda-next',
+    title: 'Upcoming agenda',
+    type: 'Widget',
+    icon: CalendarCheck2,
+    accent: 'blue',
+    value: '3 items',
+    label: 'Next 24 hours',
+    spark: ['40%', '52%', '72%', '58%', '66%'],
+  },
+  {
+    id: 'goal-progress',
+    title: 'Daily goals',
+    type: 'Stat',
+    icon: Target,
+    accent: 'violet',
+    value: '68%',
+    label: 'Completed today',
+    spark: ['28%', '44%', '52%', '60%', '68%'],
+  },
+  {
+    id: 'weekly-graph',
+    title: 'Weekly progress',
+    type: 'Graph',
+    icon: BarChart3,
+    accent: 'green',
+    value: '+12%',
+    label: 'Across key routines',
+    spark: ['36%', '58%', '48%', '72%', '88%'],
+  },
+  {
+    id: 'water-intake',
+    title: 'Water intake',
+    type: 'Widget',
+    icon: Activity,
+    accent: 'cyan',
+    value: '1.8L',
+    label: 'Logged today',
+    spark: ['20%', '38%', '46%', '62%', '72%'],
+  },
+  {
+    id: 'mood-tracker',
+    title: 'Mood tracker',
+    type: 'Widget',
+    icon: SmilePlus,
+    accent: 'violet',
+    value: 'Calm',
+    label: 'Current mood',
+    spark: ['52%', '64%', '56%', '70%', '74%'],
+  },
+  {
+    id: 'workout-summary',
+    title: 'Workout summary',
+    type: 'Widget',
+    icon: Dumbbell,
+    accent: 'blue',
+    value: 'Upper',
+    label: 'Latest session',
+    spark: ['46%', '54%', '62%', '52%', '76%'],
   },
 ];
 
@@ -240,6 +357,28 @@ function readStorageValue(key, fallback) {
   }
 }
 
+function writeStorageValue(key, value) {
+  window.localStorage.setItem(key, JSON.stringify(value));
+}
+
+function calculateAge(dateOfBirth) {
+  if (!dateOfBirth) return '';
+
+  const today = new Date();
+  const birthDate = new Date(`${dateOfBirth}T00:00:00`);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDifference = today.getMonth() - birthDate.getMonth();
+
+  if (
+    monthDifference < 0 ||
+    (monthDifference === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age -= 1;
+  }
+
+  return Number.isFinite(age) ? age : '';
+}
+
 function useLocalStorageState(key, initialValue) {
   const [value, setValue] = useState(() => readStorageValue(key, initialValue));
 
@@ -291,7 +430,57 @@ function ModuleHeader({ eyebrow, title, subtitle, onBack }) {
   );
 }
 
-function DashboardView({ userName, today, stats, onModuleClick }) {
+function DashboardView({ userName, today, stats }) {
+  const [editMode, setEditMode] = useState(false);
+  const [addPanelOpen, setAddPanelOpen] = useState(false);
+  const [draggedWidgetId, setDraggedWidgetId] = useState(null);
+  const [dashboardWidgetIds, setDashboardWidgetIds] = useLocalStorageState(
+    STORAGE_KEYS.dashboardWidgets,
+    defaultDashboardWidgets,
+  );
+
+  const catalogById = useMemo(
+    () => Object.fromEntries(dashboardWidgetCatalog.map((widget) => [widget.id, widget])),
+    [],
+  );
+  const visibleWidgets = dashboardWidgetIds.map((widgetId) => catalogById[widgetId]).filter(Boolean);
+  const hiddenWidgets = dashboardWidgetCatalog.filter(
+    (widget) => !dashboardWidgetIds.includes(widget.id),
+  );
+  const dashboardStatsByLabel = Object.fromEntries(stats.map((stat) => [stat.label, stat.value]));
+
+  function moveWidget(targetWidgetId) {
+    if (!draggedWidgetId || draggedWidgetId === targetWidgetId) return;
+
+    setDashboardWidgetIds((currentWidgetIds) => {
+      const draggedIndex = currentWidgetIds.indexOf(draggedWidgetId);
+      const targetIndex = currentWidgetIds.indexOf(targetWidgetId);
+
+      if (draggedIndex === -1 || targetIndex === -1) return currentWidgetIds;
+
+      const nextWidgetIds = [...currentWidgetIds];
+      nextWidgetIds.splice(draggedIndex, 1);
+      nextWidgetIds.splice(targetIndex, 0, draggedWidgetId);
+      return nextWidgetIds;
+    });
+  }
+
+  function removeWidget(widgetId) {
+    setDashboardWidgetIds((currentWidgetIds) =>
+      currentWidgetIds.filter((currentWidgetId) => currentWidgetId !== widgetId),
+    );
+  }
+
+  function addWidget(widgetId) {
+    setDashboardWidgetIds((currentWidgetIds) => [...currentWidgetIds, widgetId]);
+    setAddPanelOpen(false);
+  }
+
+  function resetDashboardWidgets() {
+    setDashboardWidgetIds(defaultDashboardWidgets);
+    setAddPanelOpen(false);
+  }
+
   return (
     <>
       <header className="dashboard-header">
@@ -300,45 +489,321 @@ function DashboardView({ userName, today, stats, onModuleClick }) {
           <h1>Welcome back, {userName}</h1>
           <p className="date-line">{today}</p>
         </div>
-        <button className="insight-button" type="button">
-          <BarChart3 size={18} aria-hidden="true" />
-          <span>Weekly insight</span>
-        </button>
+        <div className="dashboard-actions">
+          <button
+            className="insight-button"
+            type="button"
+            onClick={() => setEditMode((currentValue) => !currentValue)}
+          >
+            <BarChart3 size={18} aria-hidden="true" />
+            <span>{editMode ? 'Done editing' : 'Edit dashboard'}</span>
+          </button>
+          {editMode && (
+            <button
+              className="insight-button secondary"
+              type="button"
+              onClick={() => setAddPanelOpen((currentValue) => !currentValue)}
+            >
+              <Plus size={18} aria-hidden="true" />
+              <span>Add widget</span>
+            </button>
+          )}
+        </div>
       </header>
 
-      <section className="stats-bar" aria-label="Quick stats">
-        {stats.map(({ label, value, icon: Icon }) => (
-          <div className="stat-pill" key={label}>
-            <span className="stat-icon">
-              <Icon size={18} aria-hidden="true" />
-            </span>
-            <span>
-              <strong>{value}</strong>
-              <small>{label}</small>
-            </span>
+      {editMode && addPanelOpen && (
+        <section className="widget-add-panel" aria-label="Available dashboard widgets">
+          <div>
+            <h2>Choose dashboard blocks</h2>
+            <p>Mix widgets, graphs and stats. Your layout is saved locally on this laptop.</p>
           </div>
-        ))}
-      </section>
-
-      <section className="module-grid" aria-label="LifeOS modules">
-        {modules.map(({ name, subtitle, icon: Icon, accent, view }) => (
-          <button
-            className={`module-card accent-${accent}`}
-            key={name}
-            type="button"
-            onClick={() => onModuleClick(view, name)}
-          >
-            <span className="module-icon">
-              <Icon size={26} aria-hidden="true" />
-            </span>
-            <span className="module-copy">
-              <span className="module-title">{name}</span>
-              <span className="module-subtitle">{subtitle}</span>
-            </span>
+          <div className="widget-add-grid">
+            {hiddenWidgets.length === 0 && <span className="empty-add-state">Everything is already on the dashboard.</span>}
+            {hiddenWidgets.map(({ id, title, type, icon: Icon }) => (
+              <button key={id} type="button" onClick={() => addWidget(id)}>
+                <Icon size={18} aria-hidden="true" />
+                <span>{title}</span>
+                <small>{type}</small>
+              </button>
+            ))}
+          </div>
+          <button className="reset-dashboard-button" type="button" onClick={resetDashboardWidgets}>
+            Reset dashboard layout
           </button>
-        ))}
+        </section>
+      )}
+
+      <section className={`module-grid widget-dashboard-grid ${editMode ? 'editing' : ''}`} aria-label="Custom dashboard widgets">
+        {visibleWidgets.map(({ id, title, type, icon: Icon, accent, value, label, spark }) => {
+          const dynamicValue = dashboardStatsByLabel[label] || value;
+
+          return (
+            <article
+              className={`module-card dashboard-widget accent-${accent}`}
+              draggable={editMode}
+              key={id}
+              onDragStart={() => setDraggedWidgetId(id)}
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={() => moveWidget(id)}
+            >
+              {editMode && (
+                <button
+                  className="widget-remove-button"
+                  type="button"
+                  aria-label={`Remove ${title}`}
+                  onClick={() => removeWidget(id)}
+                >
+                  ×
+                </button>
+              )}
+              <span className="module-icon">
+                <Icon size={26} aria-hidden="true" />
+              </span>
+              <span className="widget-type">{type}</span>
+              <span className="module-copy">
+                <span className="module-title">{title}</span>
+                <strong className="widget-value">{dynamicValue}</strong>
+                <span className="widget-label">{label}</span>
+              </span>
+              <span className="mini-chart" aria-hidden="true">
+                {spark.map((height, index) => (
+                  <span key={`${id}-${index}`} style={{ height }} />
+                ))}
+              </span>
+            </article>
+          );
+        })}
       </section>
     </>
+  );
+}
+
+function OnboardingFlow({ onComplete }) {
+  const [stepIndex, setStepIndex] = useState(0);
+  const [profile, setProfile] = useState(onboardingInitialProfile);
+  const [error, setError] = useState('');
+  const totalSteps = 7;
+  const progress = ((stepIndex + 1) / totalSteps) * 100;
+
+  function updateProfile(field, value) {
+    setProfile((currentProfile) => ({ ...currentProfile, [field]: value }));
+    setError('');
+  }
+
+  function getStepError() {
+    const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email.trim());
+
+    if (stepIndex === 1 && !profile.firstName.trim()) return 'Vul je voornaam in.';
+    if (stepIndex === 2 && !profile.lastName.trim()) return 'Vul je achternaam in.';
+    if (stepIndex === 3 && !validEmail) return 'Vul een geldig e-mailadres in.';
+    if (stepIndex === 4 && !profile.gender) return 'Kies je gender.';
+    if (stepIndex === 5 && !profile.dateOfBirth) return 'Kies je geboortedatum.';
+    return '';
+  }
+
+  function goNext() {
+    const stepError = getStepError();
+
+    if (stepError) {
+      setError(stepError);
+      return;
+    }
+
+    setStepIndex((currentStepIndex) => Math.min(currentStepIndex + 1, totalSteps - 1));
+  }
+
+  function goBack() {
+    setError('');
+    setStepIndex((currentStepIndex) => Math.max(currentStepIndex - 1, 0));
+  }
+
+  function completeOnboarding() {
+    const completedProfile = {
+      ...profile,
+      firstName: profile.firstName.trim(),
+      lastName: profile.lastName.trim(),
+      email: profile.email.trim(),
+      age: calculateAge(profile.dateOfBirth),
+      createdAt: new Date().toISOString(),
+    };
+
+    writeStorageValue(STORAGE_KEYS.profile, completedProfile);
+    writeStorageValue(STORAGE_KEYS.onboardingComplete, true);
+    writeStorageValue(STORAGE_KEYS.preferences, {
+      accountType: 'local',
+      storage: 'localStorage',
+      savedOnDevice: true,
+    });
+    onComplete(completedProfile);
+  }
+
+  return (
+    <main className="onboarding-shell">
+      <section className="onboarding-progress" aria-label={`Step ${stepIndex + 1} of ${totalSteps}`}>
+        <div>
+          <span>Account setup</span>
+          <span>{stepIndex + 1}/{totalSteps}</span>
+        </div>
+        <span className="onboarding-progress-track">
+          <span style={{ width: `${progress}%` }} />
+        </span>
+      </section>
+
+      <section className="onboarding-card" key={stepIndex}>
+        {stepIndex === 0 && (
+          <>
+            <div className="onboarding-logo">
+              <Activity size={24} aria-hidden="true" />
+              <span>LifeOS</span>
+            </div>
+            <h1>Your life, organized beautifully.</h1>
+            <p>Maak een lokaal account aan en start met je persoonlijke dashboard.</p>
+            <button className="insight-button" type="button" onClick={goNext}>
+              Get started
+            </button>
+          </>
+        )}
+
+        {stepIndex === 1 && (
+          <OnboardingQuestion
+            title="What is your first name?"
+            value={profile.firstName}
+            placeholder="Krishen"
+            onBack={goBack}
+            onChange={(value) => updateProfile('firstName', value)}
+            onNext={goNext}
+            error={error}
+          />
+        )}
+
+        {stepIndex === 2 && (
+          <OnboardingQuestion
+            title="What is your last name?"
+            value={profile.lastName}
+            placeholder="Patel"
+            onBack={goBack}
+            onChange={(value) => updateProfile('lastName', value)}
+            onNext={goNext}
+            error={error}
+          />
+        )}
+
+        {stepIndex === 3 && (
+          <OnboardingQuestion
+            title="What is your email address?"
+            type="email"
+            value={profile.email}
+            placeholder="you@lifeos.local"
+            onBack={goBack}
+            onChange={(value) => updateProfile('email', value)}
+            onNext={goNext}
+            error={error}
+          />
+        )}
+
+        {stepIndex === 4 && (
+          <>
+            <p className="eyebrow">Profile</p>
+            <h1>What is your gender?</h1>
+            <div className="gender-grid">
+              {[
+                ['male', 'Male', '🧑‍🚀'],
+                ['female', 'Female', '👩‍🚀'],
+              ].map(([value, label, emoji]) => (
+                <button
+                  className={`gender-card ${profile.gender === value ? 'selected' : ''}`}
+                  key={value}
+                  type="button"
+                  onClick={() => updateProfile('gender', value)}
+                >
+                  <span>{emoji}</span>
+                  <strong>{label}</strong>
+                </button>
+              ))}
+            </div>
+            {error && <p className="form-error">{error}</p>}
+            <OnboardingActions onBack={goBack} onNext={goNext} />
+          </>
+        )}
+
+        {stepIndex === 5 && (
+          <>
+            <p className="eyebrow">Profile</p>
+            <h1>What is your date of birth?</h1>
+            <input
+              className="onboarding-input"
+              type="date"
+              value={profile.dateOfBirth}
+              max={getLocalDateKey()}
+              onChange={(event) => updateProfile('dateOfBirth', event.target.value)}
+            />
+            {profile.dateOfBirth && (
+              <p className="onboarding-hint">LifeOS calculates your age as {calculateAge(profile.dateOfBirth)}.</p>
+            )}
+            {error && <p className="form-error">{error}</p>}
+            <OnboardingActions onBack={goBack} onNext={goNext} />
+          </>
+        )}
+
+        {stepIndex === 6 && (
+          <>
+            <div className="onboarding-logo">
+              <Activity size={24} aria-hidden="true" />
+              <span>LifeOS</span>
+            </div>
+            <h1>Welcome to LifeOS, {profile.firstName || 'friend'}.</h1>
+            <p>Je lokale account is klaar. Alles wat je nu instelt blijft op deze laptop bewaard.</p>
+            <button className="insight-button" type="button" onClick={completeOnboarding}>
+              Go to my dashboard
+            </button>
+          </>
+        )}
+      </section>
+    </main>
+  );
+}
+
+function OnboardingQuestion({
+  title,
+  value,
+  onChange,
+  onNext,
+  onBack,
+  placeholder,
+  type = 'text',
+  error,
+}) {
+  return (
+    <>
+      <p className="eyebrow">Profile</p>
+      <h1>{title}</h1>
+      <input
+        autoFocus
+        className="onboarding-input"
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        onChange={(event) => onChange(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') onNext();
+        }}
+      />
+      {error && <p className="form-error">{error}</p>}
+      <OnboardingActions onBack={onBack} onNext={onNext} />
+    </>
+  );
+}
+
+function OnboardingActions({ onBack, onNext }) {
+  return (
+    <div className="onboarding-actions">
+      <button className="insight-button secondary" type="button" onClick={onBack}>
+        Back
+      </button>
+      <button className="insight-button" type="button" onClick={onNext}>
+        Next
+      </button>
+    </div>
   );
 }
 
@@ -1167,23 +1632,26 @@ function LogPanel({ title, children }) {
 }
 
 function App() {
-  const userName = 'Krishen';
+  const [profile, setProfile] = useLocalStorageState(STORAGE_KEYS.profile, null);
+  const [onboardingComplete, setOnboardingComplete] = useLocalStorageState(
+    STORAGE_KEYS.onboardingComplete,
+    false,
+  );
+  const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorageState(
+    STORAGE_KEYS.sidebarCollapsed,
+    false,
+  );
+  const userName = profile?.firstName || 'there';
   const todayKey = getLocalDateKey();
   const today = new Intl.DateTimeFormat('en-US', {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
+    year: 'numeric',
   }).format(new Date());
 
-  const [activeView, setActiveView] = useState('dashboard');
-  const [sleepEntries, setSleepEntries] = useLocalStorageState(STORAGE_KEYS.sleep, []);
-  const [workouts, setWorkouts] = useLocalStorageState(STORAGE_KEYS.workouts, []);
-  const [meals, setMeals] = useLocalStorageState(STORAGE_KEYS.meals, []);
-  const [habits, setHabits] = useLocalStorageState(STORAGE_KEYS.habits, []);
-  const [transactions, setTransactions] = useLocalStorageState(STORAGE_KEYS.transactions, []);
-  const [goals, setGoals] = useLocalStorageState(STORAGE_KEYS.goals, []);
-  const [diaryEntries, setDiaryEntries] = useLocalStorageState(STORAGE_KEYS.diary, {});
-  const [coachMessages, setCoachMessages] = useLocalStorageState(STORAGE_KEYS.coach, []);
+  const [habits] = useLocalStorageState(STORAGE_KEYS.habits, []);
+  const [diaryEntries] = useLocalStorageState(STORAGE_KEYS.diary, {});
 
   const dashboardStats = useMemo(() => {
     const bestHabitStreak = habits.reduce(
@@ -1206,110 +1674,49 @@ function App() {
 
   function openView(view, label) {
     console.log(`LifeOS module clicked: ${label}`);
-    setActiveView(view);
-  }
-
-  function renderActiveView() {
-    switch (activeView) {
-      case 'sleep':
-        return (
-          <SleepView
-            entries={sleepEntries}
-            setEntries={setSleepEntries}
-            onBack={() => setActiveView('dashboard')}
-          />
-        );
-      case 'gym':
-        return (
-          <GymView
-            workouts={workouts}
-            setWorkouts={setWorkouts}
-            onBack={() => setActiveView('dashboard')}
-          />
-        );
-      case 'nutrition':
-        return (
-          <NutritionView
-            meals={meals}
-            setMeals={setMeals}
-            onBack={() => setActiveView('dashboard')}
-          />
-        );
-      case 'habits':
-        return (
-          <HabitsView
-            habits={habits}
-            setHabits={setHabits}
-            todayKey={todayKey}
-            onBack={() => setActiveView('dashboard')}
-          />
-        );
-      case 'finance':
-        return (
-          <FinanceView
-            transactions={transactions}
-            setTransactions={setTransactions}
-            onBack={() => setActiveView('dashboard')}
-          />
-        );
-      case 'goals':
-        return (
-          <GoalsView
-            goals={goals}
-            setGoals={setGoals}
-            todayKey={todayKey}
-            onBack={() => setActiveView('dashboard')}
-          />
-        );
-      case 'diary':
-        return (
-          <DiaryView
-            diaryEntries={diaryEntries}
-            setDiaryEntries={setDiaryEntries}
-            todayKey={todayKey}
-            onBack={() => setActiveView('dashboard')}
-          />
-        );
-      case 'coach':
-        return (
-          <CoachView
-            messages={coachMessages}
-            setMessages={setCoachMessages}
-            onBack={() => setActiveView('dashboard')}
-          />
-        );
-      default:
-        return (
-          <DashboardView
-            stats={dashboardStats}
-            today={today}
-            userName={userName}
-            onModuleClick={openView}
-          />
-        );
+    if (view !== 'dashboard') {
+      return;
     }
   }
 
+  function completeOnboarding(completedProfile) {
+    setProfile(completedProfile);
+    setOnboardingComplete(true);
+  }
+
+  if (!profile || !onboardingComplete) {
+    return <OnboardingFlow onComplete={completeOnboarding} />;
+  }
+
   return (
-    <div className="lifeos-shell">
-      <aside className="sidebar" aria-label="LifeOS navigation">
+    <div className={`lifeos-shell ${sidebarCollapsed ? 'sidebar-is-collapsed' : ''}`}>
+      <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : 'expanded'}`} aria-label="LifeOS navigation">
         <div className="brand">
           <div className="brand-mark">
             <Activity size={22} aria-hidden="true" />
           </div>
-          <div>
+          <div className="brand-copy">
             <span className="brand-name">LifeOS</span>
             <span className="brand-label">Personal command center</span>
           </div>
+          <button
+            className="sidebar-toggle"
+            type="button"
+            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            onClick={() => setSidebarCollapsed((currentValue) => !currentValue)}
+          >
+            {sidebarCollapsed ? '›' : '‹'}
+          </button>
         </div>
 
         <nav className="nav-list">
           {navigationItems.map(({ label, view, icon: Icon }) => (
             <button
-              className={`nav-item ${activeView === view ? 'active' : ''}`}
+              className={`nav-item ${view === 'dashboard' ? 'active' : ''}`}
               key={label}
               type="button"
               onClick={() => openView(view, label)}
+              title={label}
             >
               <Icon size={19} aria-hidden="true" />
               <span>{label}</span>
@@ -1318,7 +1725,9 @@ function App() {
         </nav>
       </aside>
 
-      <main className="dashboard">{renderActiveView()}</main>
+      <main className="dashboard">
+        <DashboardView stats={dashboardStats} today={today} userName={userName} />
+      </main>
     </div>
   );
 }
