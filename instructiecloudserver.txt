@@ -1,6 +1,6 @@
 om te updaten:
 git add .
-git commit -m "update"
+git commit -m "kinky update"
 git push
 
 om te pullen:
