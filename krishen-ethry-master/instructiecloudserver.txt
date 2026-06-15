@@ -1,0 +1,13 @@
+om te updaten:
+git add .
+git commit -m "update"
+git push
+
+
+git add .
+git commit -m "laptop test"
+git push
+
+
+om te pullen:
+git pull
