@@ -4,9 +4,7 @@ git commit -m "update"
 git push
 
 
-git add .
-git commit -m "laptop test"
-git push
+git remote add origin https://github.com/realSene/krishen-ethry.git
 
 
 om te pullen:
