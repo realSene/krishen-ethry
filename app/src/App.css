@@ -1,40 +1,86 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Inter:wght@500;700;800&family=Syne:wght@700;800&display=swap');
 
 :root {
-  --black: #03060d;
-  --navy-950: #06101f;
-  --navy-900: #07172d;
-  --navy-800: #0b213f;
-  --panel: rgba(11, 31, 58, 0.58);
-  --panel-strong: rgba(12, 37, 68, 0.78);
-  --border: rgba(121, 199, 255, 0.18);
-  --border-strong: rgba(108, 214, 255, 0.36);
-  --text: #e6f2ff;
-  --muted: #93a9bf;
-  --soft: #b7cce2;
-  --cyan: #6de7ff;
-  --blue: #168bff;
-  --green: #58e6b2;
-  --violet: #9ca3ff;
-  --gold: #ffd36e;
-  --rose: #ff7ca8;
-  --shadow: 0 24px 70px rgba(0, 0, 0, 0.46);
+  --black: #101418;
+  --navy-950: #151b22;
+  --navy-900: #1b232c;
+  --navy-800: #24303a;
+  --panel: rgba(255, 255, 255, 0.06);
+  --panel-strong: rgba(255, 255, 255, 0.09);
+  --border: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.24);
+  --text: #f4f0e8;
+  --muted: #a9adb3;
+  --soft: #d3d6d9;
+  --cyan: #86b7c9;
+  --blue: #6f93b8;
+  --green: #8fbf9f;
+  --violet: #aaa1c8;
+  --gold: #d8b66a;
+  --rose: #d9909c;
+  --shadow: 0 16px 42px rgba(0, 0, 0, 0.28);
 }
 
 * {
   box-sizing: border-box;
 }
 
+::selection {
+  color: var(--text);
+  background: rgba(216, 182, 106, 0.34);
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
+}
+
+button,
+.brand,
+.nav-item,
+.module-card,
+.stat-pill,
+.widget-add-panel,
+.gender-card {
+  user-select: none;
+}
+
 button {
   font: inherit;
 }
 
+input,
+select,
+textarea {
+  accent-color: var(--gold);
+  caret-color: var(--gold);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(211, 214, 217, 0.55);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 0 3px rgba(216, 182, 106, 0.18) !important;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text);
+  box-shadow: 0 0 0 1000px #242b30 inset !important;
+}
+
 .lifeos-shell {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 82% 10%, rgba(22, 139, 255, 0.22), transparent 34rem),
-    radial-gradient(circle at 20% 88%, rgba(109, 231, 255, 0.13), transparent 30rem),
-    linear-gradient(135deg, var(--black) 0%, var(--navy-950) 48%, #02040a 100%);
+  background: linear-gradient(135deg, #101418 0%, #171f27 48%, #0f1317 100%);
   color: var(--text);
   font-family: 'DM Sans', sans-serif;
 }
@@ -44,9 +90,9 @@ button {
   inset: 0 auto 0 0;
   width: 272px;
   padding: 24px 18px;
-  background: linear-gradient(180deg, rgba(3, 6, 13, 0.94), rgba(7, 23, 45, 0.82));
-  border-right: 1px solid rgba(121, 199, 255, 0.14);
-  backdrop-filter: blur(18px);
+  background: linear-gradient(180deg, rgba(16, 20, 24, 0.96), rgba(24, 31, 38, 0.9));
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(14px);
   z-index: 10;
   transition: width 280ms ease, padding 280ms ease, background 280ms ease;
 }
@@ -67,7 +113,7 @@ button {
   gap: 13px;
   min-height: 56px;
   padding: 0 8px 22px;
-  border-bottom: 1px solid rgba(121, 199, 255, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .brand-mark {
@@ -77,9 +123,9 @@ button {
   height: 44px;
   border-radius: 14px;
   color: var(--cyan);
-  background: rgba(22, 139, 255, 0.14);
-  border: 1px solid rgba(109, 231, 255, 0.28);
-  box-shadow: 0 0 26px rgba(22, 139, 255, 0.22);
+  background: rgba(134, 183, 201, 0.14);
+  border: 1px solid rgba(134, 183, 201, 0.24);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
 }
 
 .brand-name,
@@ -128,11 +174,11 @@ button {
   place-items: center;
   width: 34px;
   height: 34px;
-  border: 1px solid rgba(109, 231, 255, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 999px;
   color: var(--text);
-  background: rgba(3, 6, 13, 0.88);
-  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.28);
+  background: rgba(16, 20, 24, 0.92);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
   cursor: pointer;
   transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
 }
@@ -140,7 +186,7 @@ button {
 .sidebar-toggle:hover {
   transform: translateX(-2px);
   border-color: var(--border-strong);
-  background: rgba(22, 139, 255, 0.24);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .nav-list {
@@ -178,13 +224,13 @@ button {
 .nav-item:hover,
 .nav-item.active {
   color: var(--text);
-  background: rgba(22, 139, 255, 0.14);
-  border-color: rgba(109, 231, 255, 0.2);
+  background: rgba(216, 182, 106, 0.12);
+  border-color: rgba(216, 182, 106, 0.22);
   transform: translateX(3px);
 }
 
 .nav-item.active {
-  box-shadow: inset 3px 0 0 var(--cyan);
+  box-shadow: inset 3px 0 0 var(--gold);
 }
 
 .dashboard {
@@ -208,7 +254,7 @@ button {
 
 .eyebrow {
   margin: 0 0 7px;
-  color: var(--cyan);
+  color: var(--gold);
   font-family: 'Inter', sans-serif;
   font-size: 0.78rem;
   font-weight: 700;
@@ -237,11 +283,11 @@ h1 {
   min-height: 44px;
   gap: 9px;
   padding: 0 16px;
-  border: 1px solid rgba(109, 231, 255, 0.26);
-  border-radius: 999px;
+  border: 1px solid rgba(216, 182, 106, 0.24);
+  border-radius: 12px;
   color: var(--text);
-  background: rgba(22, 139, 255, 0.16);
-  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.24);
+  background: rgba(216, 182, 106, 0.12);
+  box-shadow: none;
   cursor: pointer;
   transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
 }
@@ -251,13 +297,13 @@ h1 {
 }
 
 .insight-button:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   border-color: var(--border-strong);
-  background: rgba(22, 139, 255, 0.24);
+  background: rgba(216, 182, 106, 0.18);
 }
 
 .insight-button.secondary {
-  background: rgba(109, 231, 255, 0.08);
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .dashboard-actions {
@@ -283,9 +329,9 @@ h1 {
   padding: 18px;
   border: 1px solid var(--border);
   border-radius: 18px;
-  background: rgba(6, 16, 31, 0.66);
+  background: rgba(255, 255, 255, 0.055);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(18px);
+  backdrop-filter: blur(12px);
 }
 
 .stat-icon {
@@ -296,8 +342,8 @@ h1 {
   flex: 0 0 auto;
   border-radius: 14px;
   color: var(--cyan);
-  background: rgba(109, 231, 255, 0.11);
-  border: 1px solid rgba(109, 231, 255, 0.2);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .stat-pill strong {
@@ -327,13 +373,11 @@ h1 {
   padding: 22px;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 22px;
+  border-radius: 16px;
   color: var(--text);
-  background:
-    linear-gradient(145deg, rgba(12, 37, 68, 0.72), rgba(3, 6, 13, 0.42)),
-    var(--panel);
+  background: rgba(255, 255, 255, 0.06);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(22px);
+  backdrop-filter: blur(12px);
   cursor: pointer;
   text-align: left;
   transition: transform 190ms ease, border-color 190ms ease, background 190ms ease, box-shadow 190ms ease;
@@ -354,19 +398,17 @@ h1 {
   width: 86px;
   height: 86px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--accent-color) 18%, transparent);
-  filter: blur(18px);
+  background: color-mix(in srgb, var(--accent-color) 12%, transparent);
+  filter: blur(20px);
   content: '';
   pointer-events: none;
 }
 
 .module-card:hover {
-  transform: translateY(-7px);
-  border-color: color-mix(in srgb, var(--accent-color) 62%, transparent);
-  background:
-    linear-gradient(145deg, rgba(12, 48, 86, 0.82), rgba(3, 6, 13, 0.48)),
-    var(--panel-strong);
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.54);
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--accent-color) 42%, transparent);
+  background: rgba(255, 255, 255, 0.085);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
 }
 
 .module-card:focus-visible,
@@ -376,7 +418,7 @@ h1 {
 .widget-add-grid button:focus-visible,
 .reset-dashboard-button:focus-visible,
 .gender-card:focus-visible {
-  outline: 2px solid var(--cyan);
+  outline: 2px solid var(--gold);
   outline-offset: 3px;
 }
 
@@ -485,12 +527,10 @@ h1 {
   margin-bottom: 22px;
   padding: 22px;
   border: 1px solid var(--border);
-  border-radius: 22px;
-  background:
-    linear-gradient(145deg, rgba(12, 37, 68, 0.72), rgba(3, 6, 13, 0.42)),
-    var(--panel);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(22px);
+  backdrop-filter: blur(12px);
   animation: fadeSlideUp 220ms ease;
 }
 
@@ -514,10 +554,10 @@ h1 {
 
 .widget-add-grid button,
 .reset-dashboard-button {
-  border: 1px solid rgba(109, 231, 255, 0.18);
-  border-radius: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
   color: var(--text);
-  background: rgba(109, 231, 255, 0.08);
+  background: rgba(255, 255, 255, 0.07);
   cursor: pointer;
   transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
 }
@@ -533,7 +573,7 @@ h1 {
 }
 
 .widget-add-grid button small {
-  color: var(--cyan);
+  color: var(--gold);
   font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -547,9 +587,9 @@ h1 {
 
 .widget-add-grid button:hover,
 .reset-dashboard-button:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   border-color: var(--border-strong);
-  background: rgba(22, 139, 255, 0.16);
+  background: rgba(255, 255, 255, 0.11);
 }
 
 .onboarding-shell {
@@ -557,10 +597,7 @@ h1 {
   min-height: 100vh;
   place-items: center;
   padding: 96px 18px 34px;
-  background:
-    radial-gradient(circle at 20% 15%, rgba(109, 231, 255, 0.18), transparent 34rem),
-    radial-gradient(circle at 78% 78%, rgba(156, 163, 255, 0.18), transparent 30rem),
-    linear-gradient(135deg, var(--black) 0%, var(--navy-950) 48%, #02040a 100%);
+  background: linear-gradient(135deg, #101418 0%, #171f27 48%, #0f1317 100%);
   color: var(--text);
   font-family: 'DM Sans', sans-serif;
 }
@@ -587,7 +624,7 @@ h1 {
   display: block;
   height: 9px;
   overflow: hidden;
-  border: 1px solid rgba(109, 231, 255, 0.18);
+  border: 1px solid var(--border);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
 }
@@ -596,7 +633,7 @@ h1 {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--cyan), var(--violet));
+  background: linear-gradient(90deg, var(--gold), var(--green));
   transition: width 260ms ease;
 }
 
@@ -609,12 +646,10 @@ h1 {
   gap: 18px;
   padding: clamp(28px, 6vw, 54px);
   border: 1px solid var(--border);
-  border-radius: 28px;
-  background:
-    linear-gradient(145deg, rgba(12, 37, 68, 0.74), rgba(3, 6, 13, 0.5)),
-    var(--panel);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(24px);
+  backdrop-filter: blur(12px);
   animation: onboardingStep 260ms ease;
 }
 
@@ -643,27 +678,27 @@ h1 {
   width: 46px;
   height: 46px;
   padding: 10px;
-  border: 1px solid rgba(109, 231, 255, 0.28);
+  border: 1px solid rgba(134, 183, 201, 0.24);
   border-radius: 16px;
   color: var(--cyan);
-  background: rgba(22, 139, 255, 0.14);
+  background: rgba(134, 183, 201, 0.14);
 }
 
 .onboarding-input {
   width: 100%;
   min-height: 56px;
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 12px;
   outline: none;
   color: var(--text);
-  background: rgba(3, 6, 13, 0.62);
+  background: rgba(255, 255, 255, 0.075);
   padding: 0 16px;
   transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
 .onboarding-input:focus {
-  border-color: var(--border-strong);
-  box-shadow: 0 0 0 4px rgba(109, 231, 255, 0.12);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(216, 182, 106, 0.18);
 }
 
 .onboarding-actions {
@@ -681,9 +716,9 @@ h1 {
 .gender-card {
   min-height: 150px;
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 14px;
   color: var(--text);
-  background: rgba(109, 231, 255, 0.07);
+  background: rgba(255, 255, 255, 0.07);
   cursor: pointer;
   transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
 }
@@ -696,9 +731,9 @@ h1 {
 
 .gender-card.selected,
 .gender-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   border-color: var(--border-strong);
-  background: rgba(22, 139, 255, 0.16);
+  background: rgba(216, 182, 106, 0.13);
 }
 
 .form-error {

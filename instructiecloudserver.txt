@@ -5,3 +5,6 @@ git push
 
 om te pullen:
 git pull
+
+run app:
+cd c:\Users\ethry\Downloads\krishen-ethry-master\app ; npm start

@@ -1,0 +1,179 @@
+{
+  "profile": {
+    "firstName": "Krishen",
+    "lastName": "Ethry",
+    "email": "krishen@example.com",
+    "gender": "male",
+    "dateOfBirth": "1998-06-17",
+    "age": 28,
+    "createdAt": "2026-06-17T09:00:00.000Z",
+    "updatedAt": "2026-06-17T09:00:00.000Z"
+  },
+  "onboardingComplete": true,
+  "sidebarCollapsed": false,
+  "dashboardWidgets": [
+    "sleep-overview",
+    "habit-streak",
+    "finance-balance",
+    "agenda-next",
+    "goal-progress",
+    "weekly-graph"
+  ],
+  "preferences": {
+    "accountType": "local",
+    "storage": "localStorage",
+    "savedOnDevice": true
+  },
+  "developerAccounts": [
+    {
+      "id": "dev-account-sample-1",
+      "profile": {
+        "firstName": "Test",
+        "lastName": "User",
+        "email": "test@lifeos.local",
+        "dateOfBirth": "1995-01-01",
+        "age": 31,
+        "createdAt": "2026-06-17T09:00:00.000Z"
+      },
+      "preferences": {
+        "accountType": "development",
+        "storage": "localStorage",
+        "savedOnDevice": true
+      },
+      "data": {}
+    }
+  ],
+  "sleep": [
+    {
+      "id": "sleep-sample-1",
+      "bedtime": "22:30",
+      "wakeTime": "06:45",
+      "quality": 9,
+      "createdAt": "2026-06-17T07:00:00.000Z"
+    },
+    {
+      "id": "sleep-sample-2",
+      "bedtime": "23:10",
+      "wakeTime": "07:15",
+      "quality": 7,
+      "createdAt": "2026-06-16T07:20:00.000Z"
+    }
+  ],
+  "workouts": [
+    {
+      "id": "workout-sample-1",
+      "exercise": "Bench press",
+      "sets": 4,
+      "reps": 8,
+      "weight": 70,
+      "createdAt": "2026-06-16T18:30:00.000Z"
+    },
+    {
+      "id": "workout-sample-2",
+      "exercise": "Squat",
+      "sets": 5,
+      "reps": 5,
+      "weight": 95,
+      "createdAt": "2026-06-14T18:00:00.000Z"
+    }
+  ],
+  "meals": [
+    {
+      "id": "meal-sample-1",
+      "name": "Greek yogurt bowl",
+      "calories": 520,
+      "protein": 38,
+      "carbs": 58,
+      "fats": 14,
+      "createdAt": "2026-06-17T08:15:00.000Z"
+    },
+    {
+      "id": "meal-sample-2",
+      "name": "Chicken rice lunch",
+      "calories": 740,
+      "protein": 52,
+      "carbs": 82,
+      "fats": 18,
+      "createdAt": "2026-06-17T12:45:00.000Z"
+    }
+  ],
+  "habits": [
+    {
+      "id": "habit-sample-1",
+      "name": "Morning walk",
+      "completions": {
+        "2026-06-15": true,
+        "2026-06-16": true,
+        "2026-06-17": true
+      }
+    },
+    {
+      "id": "habit-sample-2",
+      "name": "Read 20 minutes",
+      "completions": {
+        "2026-06-16": true,
+        "2026-06-17": true
+      }
+    }
+  ],
+  "transactions": [
+    {
+      "id": "transaction-sample-1",
+      "type": "income",
+      "amount": 2500,
+      "category": "Salary",
+      "description": "Monthly salary",
+      "createdAt": "2026-06-01T09:00:00.000Z"
+    },
+    {
+      "id": "transaction-sample-2",
+      "type": "expense",
+      "amount": 42.5,
+      "category": "Food",
+      "description": "Groceries",
+      "createdAt": "2026-06-16T17:20:00.000Z"
+    }
+  ],
+  "goals": [
+    {
+      "id": "goal-sample-1",
+      "title": "Ship LifeOS settings",
+      "category": "Development",
+      "deadline": "2026-06-21",
+      "status": "in progress",
+      "createdAt": "2026-06-17T09:00:00.000Z",
+      "completedAt": null
+    },
+    {
+      "id": "goal-sample-2",
+      "title": "Run 5K",
+      "category": "Health",
+      "deadline": "2026-07-01",
+      "status": "not started",
+      "createdAt": "2026-06-17T09:00:00.000Z",
+      "completedAt": null
+    }
+  ],
+  "diary": {
+    "2026-06-17": {
+      "date": "2026-06-17",
+      "mood": "Focused",
+      "note": "Imported sample data and checked the dashboard flow.",
+      "updatedAt": "2026-06-17T09:00:00.000Z"
+    },
+    "2026-06-16": {
+      "date": "2026-06-16",
+      "mood": "Calm",
+      "note": "Good recovery day with a short walk.",
+      "updatedAt": "2026-06-16T20:00:00.000Z"
+    }
+  },
+  "coach": [
+    {
+      "id": "message-sample-1",
+      "sender": "user",
+      "text": "Help me prioritize today.",
+      "createdAt": "2026-06-17T09:10:00.000Z"
+    }
+  ]
+}
