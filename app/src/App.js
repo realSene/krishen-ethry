@@ -6,6 +6,8 @@ import {
   BedDouble,
   Bot,
   CalendarCheck2,
+  ChevronLeft,
+  ChevronRight,
   CheckCircle2,
   Code2,
   Database,
@@ -147,6 +149,7 @@ const defaultDashboardWidgets = [
   'sleep-overview',
   'habit-streak',
   'finance-balance',
+  'nutrition-calories',
   'agenda-next',
   'goal-progress',
   'weekly-graph',
@@ -179,9 +182,19 @@ const dashboardWidgetCatalog = [
     type: 'Stat',
     icon: PiggyBank,
     accent: 'gold',
-    value: '€0',
+    value: 'â‚¬0',
     label: 'Available this month',
     spark: ['80%', '74%', '69%', '77%', '84%'],
+  },
+  {
+    id: 'nutrition-calories',
+    title: 'Calorie count',
+    type: 'Stat',
+    icon: Salad,
+    accent: 'green',
+    value: '0',
+    label: 'Calories today',
+    spark: ['20%', '38%', '46%', '62%', '72%'],
   },
   {
     id: 'agenda-next',
@@ -306,7 +319,7 @@ const viewStyles = {
   panel: {
     border: '1px solid var(--border)',
     borderRadius: 16,
-    background: 'rgba(255, 255, 255, 0.06)',
+    background: 'var(--panel-bg)',
     boxShadow: 'var(--shadow)',
     backdropFilter: 'blur(12px)',
     padding: 22,
@@ -338,7 +351,7 @@ const viewStyles = {
     border: '1px solid var(--border)',
     borderRadius: 12,
     color: 'var(--text)',
-    background: 'rgba(255, 255, 255, 0.075)',
+    background: 'var(--control-bg)',
     padding: '0 13px',
     outline: 'none',
     fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif",
@@ -351,7 +364,7 @@ const viewStyles = {
     border: '1px solid var(--border)',
     borderRadius: 12,
     color: 'var(--text)',
-    background: 'rgba(255, 255, 255, 0.075)',
+    background: 'var(--control-bg)',
     padding: 13,
     outline: 'none',
     resize: 'vertical',
@@ -376,7 +389,7 @@ const viewStyles = {
     border: '1px solid rgba(216, 182, 106, 0.24)',
     borderRadius: 12,
     color: 'var(--text)',
-    background: 'rgba(216, 182, 106, 0.12)',
+    background: 'var(--primary-action-bg)',
     cursor: 'pointer',
     boxShadow: 'none',
     fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif",
@@ -391,7 +404,7 @@ const viewStyles = {
     border: '1px solid var(--border)',
     borderRadius: 12,
     color: 'var(--text)',
-    background: 'rgba(255, 255, 255, 0.075)',
+    background: 'var(--secondary-action-bg)',
     cursor: 'pointer',
     boxShadow: 'none',
     fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif",
@@ -417,7 +430,7 @@ const viewStyles = {
     border: '1px solid var(--border)',
     borderRadius: 12,
     color: 'var(--text)',
-    background: 'rgba(16, 20, 24, 0.74)',
+    background: 'var(--code-bg)',
     padding: 14,
     outline: 'none',
     resize: 'vertical',
@@ -433,9 +446,9 @@ const viewStyles = {
   logItem: {
     display: 'grid',
     gap: 6,
-    border: '1px solid rgba(121, 199, 255, 0.14)',
+    border: '1px solid var(--border)',
     borderRadius: 16,
-    background: 'rgba(3, 6, 13, 0.44)',
+    background: 'var(--panel-item-bg)',
     padding: 16,
   },
   logMeta: {
@@ -617,6 +630,130 @@ function buildDashboardChartData(chartId, data) {
   return [];
 }
 
+function createStandardTestingSnapshot(existingProfile = null, existingPreferences = defaultPreferences) {
+  const todayKey = getLocalDateKey();
+  const yesterday = new Date(`${todayKey}T00:00:00`);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const twoDaysAgo = new Date(`${todayKey}T00:00:00`);
+  twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+  const yesterdayKey = getLocalDateKey(yesterday);
+  const twoDaysAgoKey = getLocalDateKey(twoDaysAgo);
+
+  return {
+    profile: existingProfile || {
+      firstName: 'Test',
+      lastName: 'User',
+      email: 'test@lifeos.local',
+      dateOfBirth: '1998-06-17',
+      age: calculateAge('1998-06-17'),
+      createdAt: new Date().toISOString(),
+    },
+    onboardingComplete: true,
+    sidebarCollapsed: false,
+    dashboardWidgets: defaultDashboardWidgets,
+    dashboardCharts: [
+      'sleep-quality-chart',
+      'finance-flow-chart',
+      'workout-volume-chart',
+      'nutrition-calorie-chart',
+      'habit-completion-chart',
+    ],
+    preferences: { ...defaultPreferences, ...existingPreferences },
+    developerAccounts: [],
+    sleep: [
+      { id: createId('sleep'), bedtime: '22:30', wakeTime: '06:45', quality: 9, createdAt: `${todayKey}T07:00:00.000Z` },
+      { id: createId('sleep'), bedtime: '23:10', wakeTime: '07:15', quality: 7, createdAt: `${yesterdayKey}T07:20:00.000Z` },
+      { id: createId('sleep'), bedtime: '22:55', wakeTime: '06:50', quality: 8, createdAt: `${twoDaysAgoKey}T07:10:00.000Z` },
+    ],
+    workouts: [
+      { id: createId('workout'), exercise: 'Bench press', sets: 4, reps: 8, weight: 70, createdAt: `${todayKey}T18:30:00.000Z` },
+      { id: createId('workout'), exercise: 'Squat', sets: 5, reps: 5, weight: 95, createdAt: `${yesterdayKey}T18:00:00.000Z` },
+    ],
+    meals: [
+      {
+        id: createId('meal'),
+        name: 'Pasta carbonara',
+        calories: 820,
+        protein: 38,
+        carbs: 92,
+        fats: 32,
+        ingredients: [
+          { id: createId('ingredient'), name: 'Pasta', calories: 360, protein: 13, carbs: 72, fats: 2 },
+          { id: createId('ingredient'), name: 'Eggs', calories: 155, protein: 13, carbs: 1, fats: 11 },
+          { id: createId('ingredient'), name: 'Pancetta', calories: 210, protein: 10, carbs: 0, fats: 18 },
+          { id: createId('ingredient'), name: 'Parmesan', calories: 95, protein: 2, carbs: 19, fats: 1 },
+        ],
+        createdAt: `${todayKey}T12:45:00.000Z`,
+      },
+      {
+        id: createId('meal'),
+        name: 'Greek yogurt bowl',
+        calories: 520,
+        protein: 38,
+        carbs: 58,
+        fats: 14,
+        ingredients: [
+          { id: createId('ingredient'), name: 'Greek yogurt', calories: 190, protein: 25, carbs: 8, fats: 6 },
+          { id: createId('ingredient'), name: 'Granola', calories: 210, protein: 5, carbs: 36, fats: 6 },
+          { id: createId('ingredient'), name: 'Blueberries', calories: 60, protein: 1, carbs: 14, fats: 0 },
+          { id: createId('ingredient'), name: 'Honey', calories: 60, protein: 0, carbs: 0, fats: 2 },
+        ],
+        createdAt: `${todayKey}T08:15:00.000Z`,
+      },
+      {
+        id: createId('meal'),
+        name: 'Chicken rice lunch',
+        calories: 740,
+        protein: 52,
+        carbs: 82,
+        fats: 18,
+        ingredients: [
+          { id: createId('ingredient'), name: 'Chicken breast', calories: 280, protein: 45, carbs: 0, fats: 6 },
+          { id: createId('ingredient'), name: 'Rice', calories: 320, protein: 6, carbs: 72, fats: 2 },
+          { id: createId('ingredient'), name: 'Olive oil', calories: 120, protein: 0, carbs: 0, fats: 10 },
+          { id: createId('ingredient'), name: 'Vegetables', calories: 20, protein: 1, carbs: 10, fats: 0 },
+        ],
+        createdAt: `${yesterdayKey}T12:45:00.000Z`,
+      },
+    ],
+    habits: [
+      {
+        id: createId('habit'),
+        name: 'Morning walk',
+        completions: { [twoDaysAgoKey]: true, [yesterdayKey]: true, [todayKey]: true },
+      },
+      {
+        id: createId('habit'),
+        name: 'Read 20 minutes',
+        completions: { [yesterdayKey]: true, [todayKey]: true },
+      },
+    ],
+    transactions: [
+      { id: createId('transaction'), type: 'income', amount: 25000.3, category: 'Salary', description: 'Testing salary', createdAt: `${todayKey}T09:00:00.000Z` },
+      { id: createId('transaction'), type: 'expense', amount: 42.5, category: 'Food', description: 'Groceries', createdAt: `${todayKey}T17:20:00.000Z` },
+    ],
+    recurringTransactions: [
+      { id: createId('recurring'), type: 'expense', amount: 89.99, category: 'Subscriptions', description: 'Monthly tools', dayOfMonth: 1, startMonth: getMonthKey(), endMonth: '', active: true, createdAt: new Date().toISOString() },
+      { id: createId('recurring'), type: 'income', amount: 250, category: 'Side income', description: 'Monthly recurring income', dayOfMonth: 15, startMonth: getMonthKey(), endMonth: '', active: true, createdAt: new Date().toISOString() },
+    ],
+    goals: [
+      { id: createId('goal'), title: 'Ship LifeOS dashboard', category: 'Development', deadline: todayKey, status: 'in progress', createdAt: new Date().toISOString(), completedAt: null },
+      { id: createId('goal'), title: 'Run 5K', category: 'Health', deadline: todayKey, status: 'completed', createdAt: new Date().toISOString(), completedAt: todayKey },
+    ],
+    diary: {
+      [todayKey]: {
+        date: todayKey,
+        mood: 'Focused',
+        note: 'Loaded standard testing data.',
+        updatedAt: new Date().toISOString(),
+      },
+    },
+    coach: [
+      { id: createId('message'), sender: 'user', text: 'Help me prioritize today.', createdAt: new Date().toISOString() },
+    ],
+  };
+}
+
 function calculateAge(dateOfBirth) {
   if (!dateOfBirth) return '';
 
@@ -744,6 +881,7 @@ function DashboardView({
   transactions,
   recurringTransactions,
   todayKey,
+  widgetValues,
 }) {
   const [editMode, setEditMode] = useState(false);
   const [addPanelOpen, setAddPanelOpen] = useState(false);
@@ -901,7 +1039,7 @@ function DashboardView({
 
       <section className={`module-grid widget-dashboard-grid ${editMode ? 'editing' : ''}`} aria-label="Custom dashboard widgets">
         {visibleDashboardItems.map(({ id, title, type, icon: Icon, accent, value, label, spark, chart, itemType }) => {
-          const dynamicValue = dashboardStatsByLabel[label] || value;
+          const dynamicValue = widgetValues?.[label] ?? dashboardStatsByLabel[label] ?? value;
           const chartData = chartDataById[id] || [];
 
           return (
@@ -1075,8 +1213,8 @@ function OnboardingFlow({ onComplete }) {
             <h1>What is your gender?</h1>
             <div className="gender-grid">
               {[
-                ['male', 'Male', 'ðŸ§‘â€ðŸš€'],
-                ['female', 'Female', 'ðŸ‘©â€ðŸš€'],
+                ['male', 'Male', '♂️'],
+                ['female', 'Female', '♀️'],
               ].map(([value, label, emoji]) => (
                 <button
                   className={`gender-card ${profile.gender === value ? 'selected' : ''}`}
@@ -1364,6 +1502,38 @@ function GymView({ workouts, setWorkouts, onBack }) {
   );
 }
 
+function MacroPieChart({ protein, carbs, fats }) {
+  const total = protein + carbs + fats;
+
+  if (total <= 0) {
+    return (
+      <div className="macro-pie-empty">
+        <span>No macro data yet</span>
+      </div>
+    );
+  }
+
+  const proteinPercent = (protein / total) * 100;
+  const carbsPercent = (carbs / total) * 100;
+  const fatsPercent = (fats / total) * 100;
+  const pieBackground = `conic-gradient(var(--green) 0 ${proteinPercent}%, var(--gold) ${proteinPercent}% ${
+    proteinPercent + carbsPercent
+  }%, var(--rose) ${proteinPercent + carbsPercent}% 100%)`;
+
+  return (
+    <div className="macro-pie-wrap">
+      <div className="macro-pie" style={{ background: pieBackground }}>
+        <span>{Math.round(total)}g</span>
+      </div>
+      <div className="macro-legend">
+        <span><i className="protein" />Protein {Math.round(protein)}g ({Math.round(proteinPercent)}%)</span>
+        <span><i className="carbs" />Carbs {Math.round(carbs)}g ({Math.round(carbsPercent)}%)</span>
+        <span><i className="fats" />Fats {Math.round(fats)}g ({Math.round(fatsPercent)}%)</span>
+      </div>
+    </div>
+  );
+}
+
 function NutritionView({ meals, setMeals, onBack }) {
   const [form, setForm] = useState({
     name: '',
@@ -1372,6 +1542,35 @@ function NutritionView({ meals, setMeals, onBack }) {
     carbs: '',
     fats: '',
   });
+  const [recipeName, setRecipeName] = useState('');
+  const [ingredientForm, setIngredientForm] = useState({
+    name: '',
+    calories: '',
+    protein: '',
+    carbs: '',
+    fats: '',
+  });
+  const [ingredients, setIngredients] = useState([]);
+
+  const macroTotals = meals.reduce(
+    (totals, meal) => ({
+      calories: totals.calories + Number(meal.calories || 0),
+      protein: totals.protein + Number(meal.protein || 0),
+      carbs: totals.carbs + Number(meal.carbs || 0),
+      fats: totals.fats + Number(meal.fats || 0),
+    }),
+    { calories: 0, protein: 0, carbs: 0, fats: 0 },
+  );
+
+  const ingredientTotals = ingredients.reduce(
+    (totals, ingredient) => ({
+      calories: totals.calories + Number(ingredient.calories || 0),
+      protein: totals.protein + Number(ingredient.protein || 0),
+      carbs: totals.carbs + Number(ingredient.carbs || 0),
+      fats: totals.fats + Number(ingredient.fats || 0),
+    }),
+    { calories: 0, protein: 0, carbs: 0, fats: 0 },
+  );
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -1383,6 +1582,7 @@ function NutritionView({ meals, setMeals, onBack }) {
       protein: Number(form.protein),
       carbs: Number(form.carbs),
       fats: Number(form.fats),
+      ingredients: [],
       createdAt: new Date().toISOString(),
     };
 
@@ -1390,17 +1590,68 @@ function NutritionView({ meals, setMeals, onBack }) {
     setForm({ name: '', calories: '', protein: '', carbs: '', fats: '' });
   }
 
+  function addIngredient(event) {
+    event.preventDefault();
+    const ingredient = {
+      id: createId('ingredient'),
+      name: ingredientForm.name.trim(),
+      calories: Number(ingredientForm.calories),
+      protein: Number(ingredientForm.protein),
+      carbs: Number(ingredientForm.carbs),
+      fats: Number(ingredientForm.fats),
+    };
+
+    setIngredients((currentIngredients) => [...currentIngredients, ingredient]);
+    setIngredientForm({ name: '', calories: '', protein: '', carbs: '', fats: '' });
+  }
+
+  function removeIngredient(ingredientId) {
+    setIngredients((currentIngredients) =>
+      currentIngredients.filter((ingredient) => ingredient.id !== ingredientId),
+    );
+  }
+
+  function saveRecipeMeal() {
+    const trimmedRecipeName = recipeName.trim();
+    if (!trimmedRecipeName || ingredients.length === 0) return;
+
+    const meal = {
+      id: createId('meal'),
+      name: trimmedRecipeName,
+      calories: ingredientTotals.calories,
+      protein: ingredientTotals.protein,
+      carbs: ingredientTotals.carbs,
+      fats: ingredientTotals.fats,
+      ingredients,
+      createdAt: new Date().toISOString(),
+    };
+
+    setMeals((currentMeals) => [meal, ...currentMeals]);
+    setRecipeName('');
+    setIngredients([]);
+    setIngredientForm({ name: '', calories: '', protein: '', carbs: '', fats: '' });
+  }
+
   return (
     <div style={viewStyles.stack}>
       <ModuleHeader
         eyebrow="Nutrition"
         title="Nutrition"
-        subtitle="Log meals with calories and macro split."
+        subtitle="Log quick meals or build recipes from ingredients."
         onBack={onBack}
       />
 
+      <section className="nutrition-overview" aria-label="Nutrition macro overview">
+        <div>
+          <p className="eyebrow">Macro split</p>
+          <h2>{Math.round(macroTotals.calories)} calories logged</h2>
+          <p>Protein, carbs and fats across all saved meals.</p>
+        </div>
+        <MacroPieChart protein={macroTotals.protein} carbs={macroTotals.carbs} fats={macroTotals.fats} />
+      </section>
+
       <section style={viewStyles.panel}>
-        <h2 style={viewStyles.sectionTitle}>New meal</h2>
+        <h2 style={viewStyles.sectionTitle}>Quick meal</h2>
         <form onSubmit={handleSubmit}>
           <div style={viewStyles.formGrid}>
             <Field label="Meal name">
@@ -1413,53 +1664,99 @@ function NutritionView({ meals, setMeals, onBack }) {
               />
             </Field>
             <Field label="Calories">
-              <input
-                required
-                min="0"
-                style={viewStyles.input}
-                type="number"
-                value={form.calories}
-                onChange={(event) => setForm({ ...form, calories: event.target.value })}
-              />
+              <input required min="0" style={viewStyles.input} type="number" value={form.calories} onChange={(event) => setForm({ ...form, calories: event.target.value })} />
             </Field>
             <Field label="Protein">
-              <input
-                required
-                min="0"
-                style={viewStyles.input}
-                type="number"
-                value={form.protein}
-                onChange={(event) => setForm({ ...form, protein: event.target.value })}
-              />
+              <input required min="0" style={viewStyles.input} type="number" value={form.protein} onChange={(event) => setForm({ ...form, protein: event.target.value })} />
             </Field>
             <Field label="Carbs">
-              <input
-                required
-                min="0"
-                style={viewStyles.input}
-                type="number"
-                value={form.carbs}
-                onChange={(event) => setForm({ ...form, carbs: event.target.value })}
-              />
+              <input required min="0" style={viewStyles.input} type="number" value={form.carbs} onChange={(event) => setForm({ ...form, carbs: event.target.value })} />
             </Field>
             <Field label="Fats">
-              <input
-                required
-                min="0"
-                style={viewStyles.input}
-                type="number"
-                value={form.fats}
-                onChange={(event) => setForm({ ...form, fats: event.target.value })}
-              />
+              <input required min="0" style={viewStyles.input} type="number" value={form.fats} onChange={(event) => setForm({ ...form, fats: event.target.value })} />
             </Field>
           </div>
           <div style={viewStyles.buttonRow}>
             <button style={viewStyles.primaryButton} type="submit">
               <Plus size={17} aria-hidden="true" />
-              <span>Save meal</span>
+              <span>Save quick meal</span>
             </button>
           </div>
         </form>
+      </section>
+
+      <section style={viewStyles.panel}>
+        <h2 style={viewStyles.sectionTitle}>Build a meal from ingredients</h2>
+        <Field label="Meal name" fullWidth>
+          <input
+            placeholder="Pasta carbonara"
+            style={viewStyles.input}
+            type="text"
+            value={recipeName}
+            onChange={(event) => setRecipeName(event.target.value)}
+          />
+        </Field>
+
+        <form onSubmit={addIngredient} style={{ marginTop: 16 }}>
+          <div style={viewStyles.formGrid}>
+            <Field label="Ingredient">
+              <input required style={viewStyles.input} type="text" value={ingredientForm.name} onChange={(event) => setIngredientForm({ ...ingredientForm, name: event.target.value })} />
+            </Field>
+            <Field label="Kcal">
+              <input required min="0" style={viewStyles.input} type="number" value={ingredientForm.calories} onChange={(event) => setIngredientForm({ ...ingredientForm, calories: event.target.value })} />
+            </Field>
+            <Field label="Protein">
+              <input required min="0" style={viewStyles.input} type="number" value={ingredientForm.protein} onChange={(event) => setIngredientForm({ ...ingredientForm, protein: event.target.value })} />
+            </Field>
+            <Field label="Carbs">
+              <input required min="0" style={viewStyles.input} type="number" value={ingredientForm.carbs} onChange={(event) => setIngredientForm({ ...ingredientForm, carbs: event.target.value })} />
+            </Field>
+            <Field label="Fats">
+              <input required min="0" style={viewStyles.input} type="number" value={ingredientForm.fats} onChange={(event) => setIngredientForm({ ...ingredientForm, fats: event.target.value })} />
+            </Field>
+          </div>
+          <div style={viewStyles.buttonRow}>
+            <button style={viewStyles.secondaryButton} type="submit">
+              <Plus size={17} aria-hidden="true" />
+              <span>Add ingredient</span>
+            </button>
+          </div>
+        </form>
+
+        <div className="ingredient-builder">
+          <div className="ingredient-total-card">
+            <strong>{recipeName || 'New meal'}</strong>
+            <span>{Math.round(ingredientTotals.calories)} kcal</span>
+            <small>
+              Protein {Math.round(ingredientTotals.protein)}g, carbs {Math.round(ingredientTotals.carbs)}g, fats {Math.round(ingredientTotals.fats)}g
+            </small>
+          </div>
+          <div className="ingredient-list">
+            {ingredients.length === 0 ? (
+              <EmptyState>No ingredients added yet.</EmptyState>
+            ) : (
+              ingredients.map((ingredient) => (
+                <article key={ingredient.id}>
+                  <strong>{ingredient.name}</strong>
+                  <span>{ingredient.calories} kcal</span>
+                  <small>P {ingredient.protein}g, C {ingredient.carbs}g, F {ingredient.fats}g</small>
+                  <button type="button" onClick={() => removeIngredient(ingredient.id)}>Remove</button>
+                </article>
+              ))
+            )}
+          </div>
+        </div>
+        <div style={viewStyles.buttonRow}>
+          <button
+            disabled={!recipeName.trim() || ingredients.length === 0}
+            style={viewStyles.primaryButton}
+            type="button"
+            onClick={saveRecipeMeal}
+          >
+            <Save size={17} aria-hidden="true" />
+            <span>Save as one meal</span>
+          </button>
+        </div>
       </section>
 
       <LogPanel title="Meal log">
@@ -1469,10 +1766,15 @@ function NutritionView({ meals, setMeals, onBack }) {
           meals.map((meal) => (
             <article key={meal.id} style={viewStyles.logItem}>
               <strong>{meal.name}</strong>
-              <span style={viewStyles.logMeta}>{meal.calories} calories</span>
+              <span style={viewStyles.logMeta}>{Math.round(meal.calories)} calories</span>
               <span style={viewStyles.logMeta}>
-                Protein {meal.protein}g, carbs {meal.carbs}g, fats {meal.fats}g
+                Protein {Math.round(meal.protein)}g, carbs {Math.round(meal.carbs)}g, fats {Math.round(meal.fats)}g
               </span>
+              {meal.ingredients?.length > 0 && (
+                <span style={viewStyles.logMeta}>
+                  Ingredients: {meal.ingredients.map((ingredient) => ingredient.name).join(', ')}
+                </span>
+              )}
             </article>
           ))
         )}
@@ -1480,9 +1782,10 @@ function NutritionView({ meals, setMeals, onBack }) {
     </div>
   );
 }
-
 function HabitsView({ habits, setHabits, todayKey, onBack }) {
   const [habitName, setHabitName] = useState('');
+  const [editingHabitId, setEditingHabitId] = useState(null);
+  const [editingHabitName, setEditingHabitName] = useState('');
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -1519,6 +1822,32 @@ function HabitsView({ habits, setHabits, todayKey, onBack }) {
     );
   }
 
+  function startEditingHabit(habit) {
+    setEditingHabitId(habit.id);
+    setEditingHabitName(habit.name);
+  }
+
+  function saveHabitName(habitId) {
+    const trimmedName = editingHabitName.trim();
+    if (!trimmedName) return;
+
+    setHabits((currentHabits) =>
+      currentHabits.map((habit) => (habit.id === habitId ? { ...habit, name: trimmedName } : habit)),
+    );
+    setEditingHabitId(null);
+    setEditingHabitName('');
+  }
+
+  function deleteHabit(habitId) {
+    setHabits((currentHabits) => currentHabits.filter((habit) => habit.id !== habitId));
+  }
+
+  const streakGridDays = Array.from({ length: 14 }, (_, index) => {
+    const date = new Date(`${todayKey}T00:00:00`);
+    date.setDate(date.getDate() - (13 - index));
+    return getLocalDateKey(date);
+  });
+
   return (
     <div style={viewStyles.stack}>
       <ModuleHeader
@@ -1527,6 +1856,37 @@ function HabitsView({ habits, setHabits, todayKey, onBack }) {
         subtitle="Add habits, check them off daily, and build streaks."
         onBack={onBack}
       />
+
+      <section className="habit-streak-panel" aria-label="Habit streak overview">
+        <div>
+          <p className="eyebrow">Streak overview</p>
+          <h2>Habit streak grid</h2>
+          <p>Each filled square means the habit was completed on that day.</p>
+        </div>
+        <div className="habit-streak-list">
+          {habits.length === 0 ? (
+            <EmptyState>No habits added yet.</EmptyState>
+          ) : (
+            habits.map((habit) => (
+              <article key={habit.id} className="habit-streak-row">
+                <div>
+                  <strong>{habit.name}</strong>
+                  <small>{getHabitStreak(habit, todayKey)} day streak</small>
+                </div>
+                <span className="habit-streak-cells" aria-label={`${habit.name} streak cells`}>
+                  {streakGridDays.map((dateKey) => (
+                    <span
+                      className={habit.completions?.[dateKey] ? 'done' : ''}
+                      key={`${habit.id}-${dateKey}`}
+                      title={dateKey}
+                    />
+                  ))}
+                </span>
+              </article>
+            ))
+          )}
+        </div>
+      </section>
 
       <section style={viewStyles.panel}>
         <h2 style={viewStyles.sectionTitle}>New habit</h2>
@@ -1568,11 +1928,42 @@ function HabitsView({ habits, setHabits, todayKey, onBack }) {
                     onChange={() => toggleHabit(habit.id)}
                     type="checkbox"
                   />
-                  <strong>{habit.name}</strong>
+                  {editingHabitId === habit.id ? (
+                    <input
+                      aria-label={`Edit ${habit.name}`}
+                      style={{ ...viewStyles.input, maxWidth: 260 }}
+                      type="text"
+                      value={editingHabitName}
+                      onChange={(event) => setEditingHabitName(event.target.value)}
+                    />
+                  ) : (
+                    <strong>{habit.name}</strong>
+                  )}
                 </div>
                 <span style={viewStyles.logMeta}>
                   {isDone ? 'Done today' : 'Not done today'} - {streak} day streak
                 </span>
+                <div style={viewStyles.inlineActions}>
+                  {editingHabitId === habit.id ? (
+                    <>
+                      <button style={viewStyles.primaryButton} type="button" onClick={() => saveHabitName(habit.id)}>
+                        <Save size={16} aria-hidden="true" />
+                        <span>Save</span>
+                      </button>
+                      <button style={viewStyles.secondaryButton} type="button" onClick={() => setEditingHabitId(null)}>
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <button style={viewStyles.secondaryButton} type="button" onClick={() => startEditingHabit(habit)}>
+                      Edit
+                    </button>
+                  )}
+                  <button style={viewStyles.dangerButton} type="button" onClick={() => deleteHabit(habit.id)}>
+                    <Trash2 size={16} aria-hidden="true" />
+                    <span>Delete</span>
+                  </button>
+                </div>
               </article>
             );
           })
@@ -2241,6 +2632,7 @@ function SettingsView({
 
   function updateTheme(nextTheme) {
     const nextPreferences = { ...preferences, theme: nextTheme };
+    document.documentElement.setAttribute('data-theme', nextTheme);
     setTheme(nextTheme);
     setPreferences(nextPreferences);
     writeStorageValue(STORAGE_KEYS.preferences, nextPreferences);
@@ -2628,6 +3020,191 @@ function SettingsView({
   );
 }
 
+function DeveloperDrawer({
+  isOpen,
+  onClose,
+  profile,
+  preferences,
+  onImportStorageSnapshot,
+}) {
+  const [storageSnapshot, setStorageSnapshot] = useState(() => getStorageSnapshot());
+  const [storageEditorValue, setStorageEditorValue] = useState('');
+  const [quickModule, setQuickModule] = useState('sleep');
+  const [quickValue, setQuickValue] = useState('');
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const snapshot = getStorageSnapshot();
+    setStorageSnapshot(snapshot);
+    setStorageEditorValue(JSON.stringify(snapshot, null, 2));
+  }, [isOpen]);
+
+  function refresh(messageText = '') {
+    const snapshot = getStorageSnapshot();
+    setStorageSnapshot(snapshot);
+    setStorageEditorValue(JSON.stringify(snapshot, null, 2));
+    setMessage(messageText);
+  }
+
+  function applyStorageEditor() {
+    try {
+      onImportStorageSnapshot(JSON.parse(storageEditorValue));
+      refresh('Storage JSON applied.');
+    } catch {
+      setMessage('Storage JSON is not valid.');
+    }
+  }
+
+  function loadStandardData() {
+    onImportStorageSnapshot(createStandardTestingSnapshot(profile, preferences));
+    refresh('Standard testing data loaded.');
+  }
+
+  function addQuickValue(event) {
+    event.preventDefault();
+    const parsedValue = Number(quickValue);
+    const now = new Date().toISOString();
+    const snapshot = getStorageSnapshot();
+
+    if (quickModule === 'sleep') {
+      snapshot.sleep = [
+        { id: createId('sleep'), bedtime: '22:30', wakeTime: '06:45', quality: parsedValue || 8, createdAt: now },
+        ...(snapshot.sleep || []),
+      ];
+    }
+
+    if (quickModule === 'meals') {
+      snapshot.meals = [
+        {
+          id: createId('meal'),
+          name: 'Quick meal',
+          calories: parsedValue || 500,
+          protein: 30,
+          carbs: 55,
+          fats: 14,
+          createdAt: now,
+        },
+        ...(snapshot.meals || []),
+      ];
+    }
+
+    if (quickModule === 'transactions') {
+      snapshot.transactions = [
+        {
+          id: createId('transaction'),
+          type: parsedValue >= 0 ? 'income' : 'expense',
+          amount: Math.abs(parsedValue || 100),
+          category: 'Quick entry',
+          description: 'Added from Developer Mode',
+          createdAt: now,
+        },
+        ...(snapshot.transactions || []),
+      ];
+    }
+
+    if (quickModule === 'habits') {
+      snapshot.habits = [
+        {
+          id: createId('habit'),
+          name: quickValue.trim() || 'Quick habit',
+          completions: { [getLocalDateKey()]: true },
+        },
+        ...(snapshot.habits || []),
+      ];
+    }
+
+    onImportStorageSnapshot(snapshot);
+    setQuickValue('');
+    refresh(`Quick ${quickModule} value added.`);
+  }
+
+  const moduleCounts = Object.entries(storageSnapshot).filter(([name]) =>
+    ['sleep', 'workouts', 'meals', 'habits', 'transactions', 'recurringTransactions', 'goals', 'diary', 'coach'].includes(name),
+  );
+
+  if (!DEVELOPER_MODE) return null;
+
+  return (
+    <aside className={`developer-drawer ${isOpen ? 'open' : ''}`} aria-hidden={!isOpen}>
+      <header className="developer-drawer-header">
+        <div>
+          <p className="eyebrow">Ctrl + D</p>
+          <h2>Developer Mode</h2>
+          <p>Edit storage, seed testing data, and inspect module stats.</p>
+        </div>
+        <button className="insight-button secondary" type="button" onClick={onClose}>
+          Close
+        </button>
+      </header>
+
+      {message && <p className="developer-message">{message}</p>}
+
+      <section className="developer-section">
+        <h3>Testing Data</h3>
+        <button style={viewStyles.primaryButton} type="button" onClick={loadStandardData}>
+          <Database size={17} aria-hidden="true" />
+          <span>Load standard testing data</span>
+        </button>
+        <form onSubmit={addQuickValue} className="developer-quick-form">
+          <Field label="Module">
+            <select style={viewStyles.input} value={quickModule} onChange={(event) => setQuickModule(event.target.value)}>
+              <option value="sleep">Sleep quality</option>
+              <option value="meals">Calories</option>
+              <option value="transactions">Finance amount</option>
+              <option value="habits">Habit name</option>
+            </select>
+          </Field>
+          <Field label="Value">
+            <input
+              required
+              style={viewStyles.input}
+              type={quickModule === 'habits' ? 'text' : 'number'}
+              value={quickValue}
+              onChange={(event) => setQuickValue(event.target.value)}
+            />
+          </Field>
+          <button style={viewStyles.secondaryButton} type="submit">
+            <Plus size={17} aria-hidden="true" />
+            <span>Add quick value</span>
+          </button>
+        </form>
+      </section>
+
+      <section className="developer-section">
+        <h3>Storage JSON</h3>
+        <textarea
+          aria-label="Storage JSON"
+          style={viewStyles.codeBlock}
+          value={storageEditorValue}
+          onChange={(event) => setStorageEditorValue(event.target.value)}
+        />
+        <div style={viewStyles.buttonRow}>
+          <button style={viewStyles.primaryButton} type="button" onClick={applyStorageEditor}>
+            <Save size={17} aria-hidden="true" />
+            <span>Apply JSON</span>
+          </button>
+          <button style={viewStyles.secondaryButton} type="button" onClick={() => refresh('Storage refreshed.')}>
+            Refresh
+          </button>
+        </div>
+      </section>
+
+      <section className="developer-section">
+        <h3>Stats & Graph Data</h3>
+        <div className="developer-debug-grid">
+          {moduleCounts.map(([name, value]) => (
+            <span key={name}>
+              <strong>{getModuleEntryCount(value)}</strong>
+              <small>{name}</small>
+            </span>
+          ))}
+        </div>
+      </section>
+    </aside>
+  );
+}
+
 function LogPanel({ title, children }) {
   return (
     <section style={viewStyles.panel}>
@@ -2650,6 +3227,7 @@ function App() {
   );
   const [currentView, setCurrentView] = useState('dashboard');
   const [developerDrawerOpen, setDeveloperDrawerOpen] = useState(false);
+  const [dashboardRefreshKey, setDashboardRefreshKey] = useState(0);
   const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorageState(
     STORAGE_KEYS.sidebarCollapsed,
     false,
@@ -2683,13 +3261,12 @@ function App() {
   }, [preferences.theme]);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme;
+    document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
   useEffect(() => {
     function handleDeveloperShortcut(event) {
-      // Toggle developer mode with Ctrl+Shift+D or Cmd+Shift+D on Mac
-      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'd') {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'd') {
         event.preventDefault();
         setDeveloperDrawerOpen((currentValue) => !currentValue);
       }
@@ -2722,6 +3299,44 @@ function App() {
       { label: 'Current mood', value: currentMood, icon: SmilePlus },
     ];
   }, [diaryEntries, habits, todayKey]);
+
+  const dashboardWidgetValues = useMemo(() => {
+    const bestHabitStreak = habits.reduce(
+      (bestStreak, habit) => Math.max(bestStreak, getHabitStreak(habit, todayKey)),
+      0,
+    );
+    const sleepAverage =
+      sleepEntries.length === 0
+        ? 'No data'
+        : `${(
+            sleepEntries.reduce((total, entry) => total + (Number(entry.quality) || 0), 0) /
+            sleepEntries.length
+          ).toFixed(1)}/10`;
+    const financeBalance =
+      transactions.reduce((total, transaction) => {
+        return transaction.type === 'income'
+          ? total + Number(transaction.amount || 0)
+          : total - Number(transaction.amount || 0);
+      }, 0) + getRecurringMonthlyTotal(recurringTransactions);
+    const caloriesToday = meals
+      .filter((meal) => (meal.createdAt || '').slice(0, 10) === todayKey)
+      .reduce((total, meal) => total + Number(meal.calories || 0), 0);
+    const completedGoals = goals.filter((goal) => goal.status === 'completed').length;
+    const goalProgress = goals.length === 0 ? '0%' : `${Math.round((completedGoals / goals.length) * 100)}%`;
+    const latestWorkout = [...workouts].sort((first, second) =>
+      new Date(second.createdAt || 0) - new Date(first.createdAt || 0),
+    )[0];
+
+    return {
+      'Average sleep': sleepAverage,
+      'Best active streak': `${bestHabitStreak} days`,
+      'Available this month': currencyFormatter.format(financeBalance),
+      'Calories today': String(caloriesToday),
+      'Completed today': goalProgress,
+      'Latest session': latestWorkout?.exercise || 'No workout',
+      'Current mood': diaryEntries[todayKey]?.mood || 'Not logged',
+    };
+  }, [diaryEntries, goals, habits, meals, recurringTransactions, sleepEntries, todayKey, transactions, workouts]);
 
   function openView(view, label) {
     console.log(`LifeOS module clicked: ${label}`);
@@ -2780,6 +3395,7 @@ function App() {
     setGoals(snapshot.goals || []);
     setDiaryEntries(snapshot.diary || {});
     setCoachMessages(snapshot.coach || []);
+    setDashboardRefreshKey((currentKey) => currentKey + 1);
   }
 
   function deleteAccount() {
@@ -2805,7 +3421,22 @@ function App() {
 
   function renderCurrentView() {
     if (currentView === 'dashboard') {
-      return <DashboardView stats={dashboardStats} today={today} userName={userName} />;
+      return (
+        <DashboardView
+          habits={habits}
+          key={dashboardRefreshKey}
+          meals={meals}
+          recurringTransactions={recurringTransactions}
+          sleepEntries={sleepEntries}
+          stats={dashboardStats}
+          today={today}
+          todayKey={todayKey}
+          transactions={transactions}
+          userName={userName}
+          widgetValues={dashboardWidgetValues}
+          workouts={workouts}
+        />
+      );
     }
 
     if (currentView === 'settings') {
@@ -2821,6 +3452,8 @@ function App() {
           setDeveloperAccounts={setDeveloperAccounts}
           setPreferences={setPreferences}
           setProfile={setProfile}
+          setTheme={setTheme}
+          theme={theme}
         />
       );
     }
@@ -2912,7 +3545,7 @@ function App() {
   }
 
   return (
-    <div className={`lifeos-shell ${sidebarCollapsed ? 'sidebar-is-collapsed' : ''}`}>
+    <div className={`lifeos-shell ${sidebarCollapsed ? 'sidebar-is-collapsed' : ''}`} data-theme={theme}>
       <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : 'expanded'}`} aria-label="LifeOS navigation">
         <div className="brand">
           <div className="brand-mark">
@@ -2928,7 +3561,7 @@ function App() {
             aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             onClick={() => setSidebarCollapsed((currentValue) => !currentValue)}
           >
-            {sidebarCollapsed ? '›' : '‹'}
+            {sidebarCollapsed ? <ChevronRight size={18} aria-hidden="true" /> : <ChevronLeft size={18} aria-hidden="true" />}
           </button>
         </div>
 
@@ -2951,10 +3584,25 @@ function App() {
       <main className="dashboard">
         {renderCurrentView()}
       </main>
+      <DeveloperDrawer
+        developerAccounts={developerAccounts}
+        isOpen={developerDrawerOpen}
+        onClose={() => setDeveloperDrawerOpen(false)}
+        onDeleteAccount={deleteAccount}
+        onDeleteStorageKey={deleteStorageKey}
+        onImportStorageSnapshot={importStorageSnapshot}
+        onOpen={() => setDeveloperDrawerOpen(true)}
+        preferences={preferences}
+        profile={profile}
+        setDeveloperAccounts={setDeveloperAccounts}
+        setPreferences={setPreferences}
+        setProfile={setProfile}
+      />
     </div>
   );
 }
 
 export default App;
+
 
 
